@@ -161,7 +161,7 @@ class _LockScreenState extends State<LockScreen> {
                     
                     const SizedBox(height: 30),
                     const Text(
-                      'Enter PIN: 969 to unlock',
+                      'Enter PIN to unlock',
                       style: TextStyle(
                         color: Colors.blueGrey,
                         fontSize: 12,
