@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/services.dart';
 import 'utils/audio_player.dart';
 
 class LockScreen extends StatefulWidget {
@@ -11,7 +11,6 @@ class LockScreen extends StatefulWidget {
 
 class _LockScreenState extends State<LockScreen> {
   final TextEditingController _pinController = TextEditingController();
-  final AudioPlayer _audioPlayer = AudioPlayer();
   bool _showError = false;
   bool _isPlaying = false;
 
@@ -19,202 +18,317 @@ class _LockScreenState extends State<LockScreen> {
   void initState() {
     super.initState();
     _playHackedAudio();
+    // Enable full immersive mode
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
   }
 
   void _playHackedAudio() async {
     if (!_isPlaying) {
       _isPlaying = true;
-      await AudioUtil.playHackedSound(_audioPlayer);
+      await AudioUtil.playHackedSound();
     }
   }
 
   void _checkPin() {
     if (_pinController.text == '969') {
-      // Close app (simulate unlock)
-      SystemNavigator.pop();
+      AudioUtil.stopAudio();
+      SystemNavigator.pop(); // Exit app
     } else {
       setState(() => _showError = true);
       _pinController.clear();
-      _playHackedAudio(); // Play again on wrong pin
+      _playHackedAudio(); // Restart audio on wrong pin
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => false,
+      onWillPop: () async {
+        _playHackedAudio(); // Play audio if user tries to back
+        return false;
+      },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            // Animated Background
-            AnimatedContainer(
-              duration: const Duration(seconds: 3),
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  colors: [
-                    Colors.blue[900]!,
-                    Colors.black,
-                  ],
-                  stops: const [0.1, 1.0],
+        body: GestureDetector(
+          onTap: () {
+            // Play audio on any tap
+            if (!_isPlaying) {
+              _playHackedAudio();
+            }
+          },
+          child: Stack(
+            children: [
+              // Animated Background
+              AnimatedContainer(
+                duration: const Duration(seconds: 5),
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [
+                      Colors.blue[900]!,
+                      Colors.black,
+                    ],
+                    stops: const [0.1, 1.0],
+                    center: Alignment.topLeft,
+                  ),
                 ),
               ),
-            ),
-            
-            Center(
-              child: Container(
-                width: 350,
-                padding: const EdgeInsets.all(30),
+              
+              // Glitch Effect Overlay
+              Container(
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.blueAccent, width: 2),
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.transparent,
+                      Colors.blueAccent.withOpacity(0.05),
+                      Colors.transparent,
+                    ],
+                  ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Lock Icon
-                    const Icon(
-                      Icons.lock_outline,
-                      size: 80,
+              ),
+              
+              Center(
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  maxWidth: 350,
+                  padding: const EdgeInsets.all(30),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
                       color: Colors.blueAccent,
+                      width: 3,
                     ),
-                    const SizedBox(height: 20),
-                    
-                    // Title
-                    const Text(
-                      'DEVICE LOCKED',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        fontFamily: 'ShareTechMono',
-                        letterSpacing: 3,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueAccent.withOpacity(0.5),
+                        blurRadius: 50,
+                        spreadRadius: 10,
                       ),
-                    ),
-                    const SizedBox(height: 10),
-                    const Text(
-                      'Pegasus Trasher Security System',
-                      style: TextStyle(
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Lock Icon with Animation
+                      const Icon(
+                        Icons.lock_person,
+                        size: 100,
                         color: Colors.blueAccent,
-                        fontSize: 14,
-                        letterSpacing: 1,
                       ),
-                    ),
-                    const SizedBox(height: 40),
-                    
-                    // PIN Input
-                    TextField(
-                      controller: _pinController,
-                      obscureText: true,
-                      maxLength: 3,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 32,
-                        color: Colors.white,
-                        fontFamily: 'ShareTechMono',
-                        letterSpacing: 10,
-                      ),
-                      decoration: InputDecoration(
-                        hintText: 'PIN',
-                        hintStyle: const TextStyle(color: Colors.blueGrey),
-                        counterText: '',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(color: Colors.blueAccent),
+                      const SizedBox(height: 20),
+                      
+                      // Title with Glitch Effect
+                      const Text(
+                        '⚠ DEVICE SECURED ⚠',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          fontFamily: 'ShareTechMono',
+                          letterSpacing: 3,
+                          shadows: [
+                            Shadow(
+                              blurRadius: 10,
+                              color: Colors.blueAccent,
+                            ),
+                          ],
                         ),
-                        enabledBorder: OutlineInputBorder(
+                      ),
+                      const SizedBox(height: 10),
+                      const Text(
+                        'Pegasus Trasher v1.0 | Security Active',
+                        style: TextStyle(
+                          color: Colors.blueAccent,
+                          fontSize: 12,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      const SizedBox(height: 40),
+                      
+                      // PIN Input with Cyber Style
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.black,
                           borderRadius: BorderRadius.circular(15),
-                          borderSide: BorderSide(
+                          border: Border.all(
                             color: _showError ? Colors.red : Colors.blueAccent,
                             width: 2,
                           ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: (_showError ? Colors.red : Colors.blueAccent)
+                                  .withOpacity(0.3),
+                              blurRadius: 20,
+                              spreadRadius: 2,
+                            ),
+                          ],
                         ),
-                        filled: true,
-                        fillColor: Colors.black.withOpacity(0.5),
-                      ),
-                      keyboardType: TextInputType.number,
-                      onChanged: (value) {
-                        if (value.length == 3) {
-                          _checkPin();
-                        }
-                        if (_showError) {
-                          setState(() => _showError = false);
-                        }
-                      },
-                    ),
-                    
-                    // Error Message
-                    if (_showError)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 20),
-                        child: Text(
-                          'WRONG PIN - ACCESS DENIED',
-                          style: TextStyle(
-                            color: Colors.red[400],
-                            fontSize: 14,
+                        child: TextField(
+                          controller: _pinController,
+                          obscureText: true,
+                          maxLength: 3,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 36,
+                            color: Colors.white,
                             fontFamily: 'ShareTechMono',
+                            letterSpacing: 15,
                             fontWeight: FontWeight.bold,
                           ),
+                          decoration: const InputDecoration(
+                            hintText: '_ _ _',
+                            hintStyle: TextStyle(
+                              color: Colors.blueGrey,
+                              letterSpacing: 15,
+                            ),
+                            counterText: '',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(20),
+                          ),
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) {
+                            if (value.length == 3) {
+                              _checkPin();
+                            }
+                            if (_showError) {
+                              setState(() => _showError = false);
+                            }
+                          },
                         ),
                       ),
-                    
-                    const SizedBox(height: 30),
-                    const Text(
-                      'Enter PIN to unlock',
-                      style: TextStyle(
-                        color: Colors.blueGrey,
-                        fontSize: 12,
-                      ),
-                    ),
-                    
-                    // Emergency Unlock Button (hidden)
-                    const SizedBox(height: 40),
-                    Opacity(
-                      opacity: 0.1,
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _checkPin,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                      
+                      // Error Message
+                      if (_showError)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.error,
+                                color: Colors.red,
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'ACCESS DENIED - SYSTEM LOCKED',
+                                style: TextStyle(
+                                  color: Colors.red[400],
+                                  fontSize: 14,
+                                  fontFamily: 'ShareTechMono',
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
+                      
+                      const SizedBox(height: 30),
+                      const Text(
+                        'ENTER UNLOCK PIN: 969',
+                        style: TextStyle(
+                          color: Colors.blueGrey,
+                          fontSize: 12,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      
+                      // Hidden Unlock Button
+                      const SizedBox(height: 40),
+                      Opacity(
+                        opacity: 0.05,
+                        child: MaterialButton(
+                          onPressed: _checkPin,
+                          color: Colors.blueAccent,
+                          minWidth: double.infinity,
+                          height: 50,
                           child: const Text(
-                            'UNLOCK',
+                            'UNLOCK DEVICE',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               fontFamily: 'ShareTechMono',
+                              letterSpacing: 2,
                             ),
                           ),
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              
+              // Bottom Warning
+              Positioned(
+                bottom: 30,
+                left: 20,
+                right: 20,
+                child: Column(
+                  children: [
+                    Text(
+                      'SYSTEM STATUS: FULL LOCK ACTIVE',
+                      style: TextStyle(
+                        color: Colors.blueAccent,
+                        fontSize: 12,
+                        fontFamily: 'ShareTechMono',
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      '⚠ Do not attempt to force close or reboot device ⚠',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 10,
+                        fontFamily: 'ShareTechMono',
                       ),
                     ),
                   ],
                 ),
               ),
-            ),
-            
-            // Warning Text
-            const Positioned(
-              bottom: 50,
-              left: 0,
-              right: 0,
-              child: Text(
-                '⚠ System Security Active - Do Not Attempt To Bypass ⚠',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.blueGrey,
-                  fontSize: 12,
-                  fontFamily: 'ShareTechMono',
+              
+              // Network Scan Animation
+              Positioned(
+                top: 50,
+                right: 20,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: Colors.green),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      const Text(
+                        'SECURE',
+                        style: TextStyle(
+                          color: Colors.green,
+                          fontSize: 10,
+                          fontFamily: 'ShareTechMono',
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -222,7 +336,6 @@ class _LockScreenState extends State<LockScreen> {
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
     _pinController.dispose();
     super.dispose();
   }
