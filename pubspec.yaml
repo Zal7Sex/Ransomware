@@ -1,0 +1,24 @@
+name: pegasus_trasher
+description: Aplikasi Pegasus Trasher
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  audioplayers: ^5.2.1
+  flutter_localizations:
+    sdk: flutter
+  permission_handler: ^10.4.4
+  window_manager: ^0.3.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/hacked.mp3
+  fonts:
+    - family: ShareTechMono
+      fonts:
+        - asset: assets/fonts/ShareTechMono-Regular.ttf
