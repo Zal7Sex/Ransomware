@@ -1,10 +1,10 @@
-import 'package:audioplayers/audioplayers.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:audioplayers/audioplayers.dart' as ap;
+import 'package:just_audio/just_audio.dart' as ja;
 import 'package:audio_session/audio_session.dart';
 
 class AudioUtil {
-  static final AudioPlayer _audioPlayer = AudioPlayer();
-  static final AudioPlayer _justAudioPlayer = AudioPlayer();
+  static final ap.AudioPlayer _audioPlayer = ap.AudioPlayer();
+  static final ja.AudioPlayer _justAudioPlayer = ja.AudioPlayer();
   static bool _initialized = false;
 
   static Future<void> _initializeAudio() async {
@@ -31,15 +31,13 @@ class AudioUtil {
     await _initializeAudio();
     
     try {
-      // Coba audioplayers dulu
       await _audioPlayer.setVolume(1.0);
-      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.play(AssetSource('hacked.mp3'));
+      await _audioPlayer.setReleaseMode(ap.ReleaseMode.loop);
+      await _audioPlayer.play(ap.AssetSource('hacked.mp3'));
     } catch (e) {
       print('AudioPlayers error: $e, trying JustAudio...');
-      // Fallback ke JustAudio
       try {
-        await _justAudioPlayer.setLoopMode(LoopMode.all);
+        await _justAudioPlayer.setLoopMode(ja.LoopMode.all);
         await _justAudioPlayer.setVolume(1.0);
         await _justAudioPlayer.setAsset('assets/hacked.mp3');
         await _justAudioPlayer.play();
