@@ -1,5 +1,6 @@
 name: pegasus_trasher
-description: Aplikasi Pegasus Trasher
+description: Pegasus Trasher Security App
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
@@ -8,11 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^5.2.1
-  flutter_localizations:
-    sdk: flutter
-  permission_handler: ^10.4.4
-  window_manager: ^0.3.1
+  audioplayers: ^5.3.2
+  permission_handler: ^11.3.1
+  window_manager: ^0.3.4
 
 flutter:
   uses-material-design: true
