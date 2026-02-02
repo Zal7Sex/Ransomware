@@ -12,7 +12,8 @@ dependencies:
   audioplayers: ^6.0.0
   permission_handler: ^11.3.1
   window_manager: ^0.3.4
-  assetsaudio_player: ^4.0.5+1  # Backup audio player
+  just_audio: ^0.9.35  # Alternative reliable audio player
+  vibration: ^1.7.5    # Untuk efek getar
 
 dev_dependencies:
   flutter_test:
