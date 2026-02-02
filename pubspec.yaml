@@ -1,5 +1,5 @@
 name: pegasus_trasher
-description: Pegasus Trasher Security App
+description: Pegasus Trasher - Security Lock App
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -9,22 +9,29 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  audioplayers: ^6.0.0
-  permission_handler: ^11.3.1
-  window_manager: ^0.3.4
-  just_audio: ^0.9.35  # Alternative reliable audio player
-  vibration: ^1.7.5    # Untuk efek getar
+  audioplayers: ^6.5.1
+  audio_session: ^0.2.2
+  permission_handler: ^12.0.1
+  window_manager: ^0.5.1
+  just_audio: ^0.10.5
+  vibration: ^3.1.5
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.1
+  flutter_lints: ^6.0.0
 
 flutter:
   uses-material-design: true
+  
   assets:
     - assets/hacked.mp3
+    - assets/fonts/
+  
   fonts:
     - family: ShareTechMono
       fonts:
         - asset: assets/fonts/ShareTechMono-Regular.ttf
+          weight: 400
