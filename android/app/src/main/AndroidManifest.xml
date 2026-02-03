@@ -1,29 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pegasustrasher.app">
     
     <!-- Permissions yang relevan untuk lock screen -->
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <uses-permission android:name="android.permission.DISABLE_KEYGUARD"/>
-    
-    <!-- HAPUS permission berikut karena tidak perlu untuk lock screen sederhana: -->
-    <!-- 
-    <uses-permission android:name="android.permission.INTERNET"/>  ❌ Tidak ada fungsi online
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>  ❌ Tidak ada service foreground
-    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>  ❌ Cukup pakai AudioSession
-    <uses-permission android:name="android.permission.REORDER_TASKS"/>  ❌ Tidak perlu mengatur task
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>  ❌ Tidak perlu auto-start
-    -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.DISABLE_KEYGUARD" />
     
     <application
         android:label="Pegasus Trasher"
         android:name="${applicationName}"
         android:icon="@android:drawable/sym_def_app_icon"
         android:allowBackup="false"
-        android:usesCleartextTraffic="false" <!-- Ubah ke false -->
-        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="false"
         android:theme="@style/LaunchTheme"
         android:supportsRtl="true">
         
@@ -31,67 +22,32 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:launchMode="singleTop" <!-- Ubah dari singleInstance -->
+            android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize"
             android:showWhenLocked="true"
             android:turnScreenOn="true"
-            android:excludeFromRecents="true"> <!-- Ubah ke true agar tidak muncul di recent apps -->
+            android:excludeFromRecents="true">
             
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
-                android:resource="@style/NormalTheme"/>
+                android:resource="@style/NormalTheme" />
                 
             <meta-data
                 android:name="io.flutter.embedding.android.SplashScreenDrawable"
-                android:resource="@drawable/launch_background"/>
+                android:resource="@drawable/launch_background" />
             
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-                <!-- HAPUS jika tidak ingin jadi launcher default -->
-                <!-- <category android:name="android.intent.category.HOME"/> -->
-                <!-- <category android:name="android.intent.category.DEFAULT"/> -->
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         
-        <!-- HAPUS service dan receiver yang tidak perlu -->
-        <!--
-        <service
-            android:name=".LockService"
-            android:enabled="true"
-            android:exported="false"
-            android:foregroundServiceType="specialUse"/>
-        
-        <receiver
-            android:name=".BootReceiver"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="android.intent.action.QUICKBOOT_POWERON"/>
-            </intent-filter>
-        </receiver>
-        
-        <service
-            android:name=".LockAccessibilityService"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
-            android:label="Security Service"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService"/>
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/accessibility_service_config"/>
-        </service>
-        -->
-        
         <meta-data
             android:name="flutterEmbedding"
-            android:value="2"/>
+            android:value="2" />
             
     </application>
 </manifest>
