@@ -12,7 +12,7 @@
     <application
         android:label="Pegasus Trasher"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@android:drawable/ic_lock_lock"
         android:allowBackup="false"
         android:usesCleartextTraffic="false"
         android:theme="@style/LaunchTheme"
