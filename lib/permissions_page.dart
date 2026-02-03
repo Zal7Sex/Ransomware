@@ -13,6 +13,7 @@ class PermissionsPage extends StatefulWidget {
 class _PermissionsPageState extends State<PermissionsPage> {
   bool _isGranted = false;
   bool _isProcessing = false;
+  bool _showManualGuide = false;
 
   @override
   void initState() {
@@ -22,8 +23,9 @@ class _PermissionsPageState extends State<PermissionsPage> {
 
   Future<void> _checkPermission() async {
     final status = await Permission.systemAlertWindow.status;
+    print('Overlay permission status: $status');
+    
     if (status.isGranted) {
-      // Langsung ke lock screen
       _activateLock();
     }
   }
@@ -34,15 +36,20 @@ class _PermissionsPageState extends State<PermissionsPage> {
     setState(() => _isProcessing = true);
     
     final status = await Permission.systemAlertWindow.request();
+    print('Permission request result: $status');
     
-    if (status.isGranted || status.isLimited) {
-      setState(() => _isGranted = true);
-      await Future.delayed(const Duration(milliseconds: 500));
+    if (status.isGranted) {
+      setState(() {
+        _isGranted = true;
+        _showManualGuide = false;
+      });
+      await Future.delayed(const Duration(milliseconds: 800));
       _activateLock();
     } else {
-      // Kalau ditolak, buka settings
-      setState(() => _isProcessing = false);
-      await openAppSettings();
+      setState(() {
+        _isProcessing = false;
+        _showManualGuide = true;
+      });
     }
   }
 
@@ -57,6 +64,79 @@ class _PermissionsPageState extends State<PermissionsPage> {
     }
   }
 
+  Widget _buildManualGuide() {
+    return Container(
+      margin: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.red.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.red),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '⚠️ MANUAL SETUP REQUIRED',
+            style: TextStyle(
+              color: Colors.red,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Android requires manual permission setup:',
+            style: TextStyle(color: Colors.white70),
+          ),
+          const SizedBox(height: 10),
+          _buildStep('1. Tap "OPEN SETTINGS" below'),
+          _buildStep('2. Find "Display over other apps"'),
+          _buildStep('3. Enable for Pegasus Trasher'),
+          _buildStep('4. Return to this app'),
+          const SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () => openAppSettings(),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+                child: const Row(
+                  children: [
+                    Icon(Icons.settings, size: 18),
+                    SizedBox(width: 8),
+                    Text('OPEN SETTINGS'),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              TextButton(
+                onPressed: () => setState(() => _showManualGuide = false),
+                child: const Text('DISMISS'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(color: Colors.blueAccent)),
+          Expanded(child: Text(text, style: const TextStyle(color: Colors.white70))),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,6 +144,7 @@ class _PermissionsPageState extends State<PermissionsPage> {
       body: Center(
         child: Container(
           width: 400,
+          constraints: const BoxConstraints(maxWidth: 400),
           padding: const EdgeInsets.all(30),
           decoration: BoxDecoration(
             color: const Color(0xFF1E3A8A),
@@ -79,15 +160,15 @@ class _PermissionsPageState extends State<PermissionsPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.security,
+              Icon(
+                Icons.layers,
                 size: 80,
-                color: Colors.blueAccent,
+                color: _isGranted ? Colors.green : Colors.blueAccent,
               ),
               const SizedBox(height: 20),
-              const Text(
-                'SYSTEM PERMISSION REQUIRED',
-                style: TextStyle(
+              Text(
+                _isGranted ? 'PERMISSION GRANTED!' : 'OVERLAY PERMISSION',
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
@@ -96,22 +177,23 @@ class _PermissionsPageState extends State<PermissionsPage> {
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                'This app needs permission to display over other apps for security lock feature.',
+              Text(
+                _isGranted 
+                    ? 'Lock screen will appear over other apps'
+                    : 'Required to display lock screen overlay',
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.blueGrey,
                   fontSize: 14,
                 ),
               ),
               const SizedBox(height: 40),
               
-              // Permission Card
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
                   color: _isGranted
-                      ? const Color(0xFF3B82F6).withOpacity(0.3)
+                      ? Colors.green.withOpacity(0.15)
                       : const Color(0xFF0F3460),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
@@ -121,10 +203,15 @@ class _PermissionsPageState extends State<PermissionsPage> {
                 ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      backgroundColor: _isGranted ? Colors.green : Colors.blueAccent,
+                    Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: _isGranted ? Colors.green : Colors.blueAccent,
+                        shape: BoxShape.circle,
+                      ),
                       child: Icon(
-                        _isGranted ? Icons.check : Icons.phonelink_lock,
+                        _isGranted ? Icons.check : Icons.layers,
                         color: Colors.white,
                         size: 24,
                       ),
@@ -139,18 +226,17 @@ class _PermissionsPageState extends State<PermissionsPage> {
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 16,
-                              fontFamily: 'ShareTechMono',
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           const SizedBox(height: 5),
                           Text(
                             _isGranted 
-                                ? '✓ Permission Granted'
-                                : 'Required for lock screen overlay',
+                                ? '✓ Permission active - Lock screen enabled'
+                                : 'Allows app to show on top of other apps',
                             style: TextStyle(
                               color: _isGranted ? Colors.greenAccent : Colors.blueGrey,
-                              fontSize: 12,
+                              fontSize: 13,
                             ),
                           ),
                         ],
@@ -162,56 +248,85 @@ class _PermissionsPageState extends State<PermissionsPage> {
               
               const SizedBox(height: 40),
               
-              // Grant Button
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isProcessing || _isGranted ? null : _grantPermission,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF3B82F6),
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+              if (!_isGranted && !_showManualGuide)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isProcessing ? null : _grantPermission,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF3B82F6),
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: _isProcessing
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.lock_open),
+                              SizedBox(width: 10),
+                              Text(
+                                'GRANT OVERLAY PERMISSION',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ),
+                ),
+              
+              if (_isGranted)
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => _activateLock(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(vertical: 18),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.play_arrow),
+                        SizedBox(width: 10),
+                        Text(
+                          'START LOCK SCREEN',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  child: _isProcessing
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(_isGranted ? Icons.check_circle : Icons.lock_open),
-                            const SizedBox(width: 10),
-                            Text(
-                              _isGranted 
-                                  ? 'ACTIVATING LOCK...'
-                                  : 'GRANT PERMISSION',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: 'ShareTechMono',
-                                letterSpacing: 1,
-                              ),
-                            ),
-                          ],
-                        ),
                 ),
-              ),
               
-              const SizedBox(height: 20),
+              if (_showManualGuide) _buildManualGuide(),
               
-              // Info text
+              const SizedBox(height: 25),
+              const Divider(color: Colors.blueGrey),
+              const SizedBox(height: 15),
               const Text(
-                '⚠️ After granting permission, the lock screen will activate automatically',
+                'Note: After granting permission, lock screen will appear\nwhen you press Home button or switch apps',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.orange,
+                  color: Colors.blueGrey,
                   fontSize: 11,
                   fontStyle: FontStyle.italic,
                 ),
